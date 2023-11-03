@@ -1,0 +1,48 @@
+import { sqlConfig } from "../config/sqlconfig";
+import mssql from "mssql";
+
+export default class Connection {
+  private pool: Promise<mssql.ConnectionPool>;
+
+  constructor() {
+    this.pool = this.getConnection();
+  }
+
+  async getConnection(): Promise<mssql.ConnectionPool> {
+    const pool = mssql.connect(sqlConfig) as Promise<mssql.ConnectionPool>;
+
+    return pool;
+  }
+
+  //Data rep our inputs which can be a string or number
+
+    createRequest(request: mssql.Request, data: { [c: string | number]: string | number }) {
+        const keys = Object.keys(data);
+
+        keys.map((keyName) => {
+            const keyValue = data[keyName];
+            request.input(keyName, keyValue);
+        });
+
+        return request;
+    }
+    
+    async query(query: string) {
+        const results = (await this.pool).request().query(query);
+
+        return results;
+    }
+
+    async execute( procedureName: string, data: { [c: string | number]: string | number } = {}) {
+        let pool = await this.pool;
+
+        let request = (await pool.request()) as mssql.Request;
+
+        request = this.createRequest(request, data);
+
+        const result = await request.execute(procedureName);
+
+        return result;
+    }
+}
+

@@ -1,0 +1,11 @@
+###
+POST http://localhost:3000/note/addnote
+Content-Type: application/json
+
+{
+    "content" : "Assessment",
+    "createdAt": "2023-11-03"
+}
+
+###
+POST http://localhost:3000/note/fetch
